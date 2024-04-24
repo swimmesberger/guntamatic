@@ -11,15 +11,15 @@ name = "guntamatic_web"
 path = "src/lib/mod.rs"
 
 [dependencies]
-reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
-http = "0.2.4"
-http-types = "2.11.1"
+reqwest = { version = "0.12.4", default-features = false, features = ["json", "rustls-tls"] }
+http = "1.1.0"
+http-types = "2.12.0"
 
-serde = { version = "1.0.126", features = ["derive"] }
-serde_json = "1.0.64"
-serde_qs = "0.8.4"
-serde_repr = "0.1.7"
+serde = { version = "1.0.198", features = ["derive"] }
+serde_json = "1.0.116"
+serde_qs = "0.13.0"
+serde_repr = "0.1.10"
 
-log = "0.4.11"
-thiserror = "1.0.26"
-anyhow = "1.0.41"
+log = "0.4.21"
+thiserror = "1.0.59"
+anyhow = "1.0.82"

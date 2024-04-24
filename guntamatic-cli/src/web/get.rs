@@ -1,7 +1,7 @@
-use clap::Clap;
+use clap::Parser;
 use anyhow::anyhow;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[derive(Clone)]
 pub struct Options {
 

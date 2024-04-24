@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use log::trace;
 use serde::Deserialize;
 
@@ -73,17 +74,20 @@ pub enum Unit {
     Days,
     Hours,
     CubicMeter,
+    None,
 }
 
-impl ToString for Unit {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for Unit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             Self::DegreeCelsius => "°C",
             Self::Percent => "%",
             Self::Days => "d",
             Self::Hours => "h",
             Self::CubicMeter => "m3",
-        }.to_string()
+            _ => ""
+        }.to_string();
+        write!(f, "{}", str)
     }
 }
 
@@ -99,6 +103,7 @@ impl <'de> Deserialize<'de> for Unit {
             "d" => Self::Days,
             "h" => Self::Hours,
             "m3" => Self::CubicMeter,
+            " " => Self::None,
             v => return Err(Error::unknown_variant(v, &[
                 "°C",
                 "%",

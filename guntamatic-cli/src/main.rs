@@ -1,4 +1,4 @@
-use clap::Clap;
+use clap::Parser;
 
 #[macro_use] extern crate log;
 
@@ -6,28 +6,35 @@ use std::time::Duration;
 
 mod web;
 
-#[derive(Clap)]
-#[clap(
+#[derive(Parser)]
+#[command(
     name = "guntamatic",
-    version = "0.1.0",
-    author = "Gero Posmyk-Leinemann <gero.posmyk@posteo.de>",
-    about = "CLI tool to connect to and extract data from Guntamatic Devices"
+    version = "0.2.1",
+    author = "swimmes <wimmesberger@gmail.com>",
+    about = "CLI tool to connect to and extract data from Guntamatic Devices",
+    help_template = "\
+{before-help}{name} {version}
+{author-with-newline}{about-with-newline}
+{usage-heading} {usage}
+
+{all-args}{after-help}
+"
 )]
 pub struct Options {
     /// Controls the log level. ex.: -v,  -vv or -vvv
-    #[clap(
+    #[arg(
         short = 'v',
         long = "verbose",
-        parse(from_occurrences)
+        action = clap::ArgAction::Count
     )]
-    verbose: u16,
+    verbose: u8,
 
-    #[clap(subcommand)]
+    #[command(subcommand)]
     cmd: SubCmds,
 }
-#[derive(Clap)]
+#[derive(Parser)]
 pub enum SubCmds {
-    #[clap(
+    #[command(
         name = "web",
         about = "Accessing devices using web/HTTP APIs"
     )]
@@ -43,6 +50,7 @@ fn parse_duration(secs_str: &str) -> Result<Duration, std::num::ParseIntError> {
 
 type AResult<T> = Result<T, anyhow::Error>;
 
+//noinspection RsUnreachableCode
 #[tokio::main]
 async fn main() -> AResult<()> {
     let options = Options::parse();

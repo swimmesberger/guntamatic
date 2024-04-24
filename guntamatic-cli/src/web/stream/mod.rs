@@ -1,30 +1,31 @@
 use std::time::Duration;
 
-use clap::Clap;
+use clap::Parser;
 
 #[cfg(feature = "sink_prometheus")]
 mod sink_prometheus;
 #[cfg(feature = "sink_influxdb")]
 mod sink_influxdb;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[derive(Clone)]
 pub struct Options {
     /// The interval in which to poll the device for data [seconds]
-    #[clap(
+    #[arg(
         long = "interval",
         short = 'i',
+        env = "GUNTAMATIC_POLL_INTERVAL_SECONDS",
         default_value = "30",
-        parse(try_from_str = super::super::parse_duration)
+        value_parser = super::super::parse_duration
     )]
     pub interval: Duration,
 
     /// The sink to write DAQ data to
-    #[clap(subcommand)]
+    #[command(subcommand)]
     pub sink: Sink,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[derive(Clone)]
 pub enum Sink {
     // #[cfg(feature = "sink_prometheus")]
@@ -34,7 +35,7 @@ pub enum Sink {
     // )]
     // Prometheus(sink_prometheus::Options),
     #[cfg(feature = "sink_influxdb")]
-    #[clap(
+    #[command(
         name = "influxdb",
         about = "Push parsed DAQ data into the configured InfluxDB"
     )]
@@ -57,13 +58,15 @@ pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Option
             match daq_data {
                 Err(err) => error!("error while retrieving DAQ data: {}", err),
                 Ok(daq_data) => {
+                    debug!("sending {:?} number of entries seconds...", daq_data.values.len());
                     let res = tx.send_async(daq_data).await;
                     if let Err(err) = res {
                         error!("error while forwarding DAQ data: {}", err);
                     }
                 },
             };
-            
+
+            debug!("waiting {:?} seconds...", opts.interval);
             tokio::time::sleep(opts.interval).await;
         }
     });
