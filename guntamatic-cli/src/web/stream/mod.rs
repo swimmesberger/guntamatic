@@ -81,7 +81,7 @@ pub async fn exec(
         // },
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
-            crate::sink::influxdb::drain(&influx_opts, rc, "web").await?;
+            crate::sink::influxdb::drain(influx_opts, rc, "web").await?;
         },
     };
     Ok(())
