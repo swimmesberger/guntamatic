@@ -1,7 +1,40 @@
 //! Core types shared between guntamatic-web and guntamatic-modbus.
 
 use std::fmt::Display;
+use async_trait::async_trait;
 use serde::Deserialize;
+
+/// A trait for DAQ data sources that can be polled for data.
+///
+/// This abstraction allows different data sources (Modbus, HTTP) to be used
+/// interchangeably in polling loops, while managing their connections efficiently.
+///
+/// # Example
+///
+/// ```ignore
+/// use guntamatic_core::DaqSource;
+///
+/// async fn poll_loop<S: DaqSource>(source: &mut S) {
+///     loop {
+///         match source.poll().await {
+///             Ok(data) => println!("Got {} values", data.values.len()),
+///             Err(e) => eprintln!("Error: {}", e),
+///         }
+///         tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+///     }
+/// }
+/// ```
+#[async_trait]
+pub trait DaqSource: Send {
+    /// Poll for current DAQ data.
+    ///
+    /// This method should efficiently fetch the current values, reusing any
+    /// existing connections or cached metadata where possible.
+    async fn poll(&mut self) -> Result<DaqData, anyhow::Error>;
+
+    /// Returns the name of this source type (e.g., "modbus", "web").
+    fn source_name(&self) -> &'static str;
+}
 
 /// Container for all DAQ (Data Acquisition) values.
 #[derive(Debug, Clone, PartialEq)]

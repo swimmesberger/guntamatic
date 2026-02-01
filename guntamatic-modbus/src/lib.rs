@@ -22,30 +22,31 @@
 //! }
 //! ```
 
+//! Guntamatic Modbus/TCP client library.
+//!
+//! This crate provides a client for communicating with Guntamatic heating systems
+//! via the Modbus/TCP protocol.
+//!
+//! # Example
+//!
+//! ```ignore
+//! use guntamatic_modbus::ModbusSource;
+//! use guntamatic_core::DaqSource;
+//!
+//! let mut source = ModbusSource::connect("192.168.1.100", "your-key").await?;
+//! loop {
+//!     let data = source.poll().await?;
+//!     println!("{:?}", data);
+//!     tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+//! }
+//! ```
+
 mod client;
 mod decode;
 mod mapping;
 
-pub use client::ModbusClient;
+pub use client::ModbusSource;
 pub use mapping::{fetch_mapping, ModbusMapping, ModbusMappingEntry};
 
 // Re-export core types for convenience
-pub use guntamatic_core::{DaqData, DaqDescription, DaqValue, DataType, Unit};
-
-/// Load and parse DAQ data from a Guntamatic device via Modbus/TCP.
-///
-/// This is a convenience function that creates a client, connects, authenticates,
-/// fetches the mapping, and reads all DAQ data.
-///
-/// # Arguments
-///
-/// * `addr` - The address of the Modbus device (IP:port or just IP, defaults to port 502)
-/// * `key` - The authentication key for the device
-///
-/// # Returns
-///
-/// Returns the parsed DAQ data or an error.
-pub async fn load_and_parse_daq_data(addr: &str, key: &str) -> Result<DaqData, anyhow::Error> {
-    let client = ModbusClient::new(addr, key);
-    client.load_and_parse_daq_data().await
-}
+pub use guntamatic_core::{DaqData, DaqDescription, DaqSource, DaqValue, DataType, Unit};

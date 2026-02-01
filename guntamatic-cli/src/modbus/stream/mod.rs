@@ -36,24 +36,37 @@ pub async fn exec(
     modbus_opts: &super::Options,
     opts: &Options,
 ) -> Result<(), anyhow::Error> {
-    use guntamatic_core::DaqData;
+    use guntamatic_core::DaqSource;
+    use guntamatic_modbus::ModbusSource;
 
     let sink = opts.sink.clone();
-    let modbus_opts = modbus_opts.clone();
-    let opts = opts.clone();
+    let interval = opts.interval;
 
-    let (tx, rc) = flume::unbounded::<DaqData>();
+    // Connect once at startup
+    info!("connecting to Modbus at {}...", modbus_opts.addr);
+    let mut source = ModbusSource::connect(
+        modbus_opts.addr.as_str(),
+        modbus_opts.key.as_str(),
+    ).await?;
+    info!("connected to Modbus, starting polling loop");
+
+    let (tx, rc) = flume::unbounded();
     let _listener = tokio::spawn(async move {
         loop {
             info!("retrieving DAQ data via Modbus...");
-            let daq_data = guntamatic_modbus::load_and_parse_daq_data(
-                modbus_opts.addr.as_str(),
-                modbus_opts.key.as_str(),
-            )
-            .await;
+            let daq_data = source.poll().await;
             
             match daq_data {
-                Err(err) => error!("error while retrieving DAQ data: {}", err),
+                Err(err) => {
+                    error!("error while retrieving DAQ data: {}", err);
+                    // Attempt to reconnect on error
+                    warn!("attempting to reconnect...");
+                    if let Err(reconnect_err) = source.reconnect().await {
+                        error!("reconnection failed: {}", reconnect_err);
+                    } else {
+                        info!("reconnected successfully");
+                    }
+                }
                 Ok(daq_data) => {
                     debug!(
                         "sending {:?} number of entries...",
@@ -66,8 +79,8 @@ pub async fn exec(
                 }
             };
 
-            debug!("waiting {:?} seconds...", opts.interval);
-            tokio::time::sleep(opts.interval).await;
+            debug!("waiting {:?} seconds...", interval);
+            tokio::time::sleep(interval).await;
         }
     });
 

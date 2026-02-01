@@ -41,18 +41,22 @@ pub enum Sink {
 }
 
 pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Options, opts: &Options) -> Result<(), anyhow::Error> {
-    use guntamatic_web as gweb;
+    use guntamatic_core::DaqSource;
+    use guntamatic_web::WebSource;
 
     let sink = opts.sink.clone();
-    let web_opts = web_opts.clone();
-    let opts = opts.clone();
+    let interval = opts.interval;
     
-    let (tx, rc) = flume::unbounded::<gweb::DaqData>();
+    // Connect once at startup
+    info!("connecting to web API at {}...", web_opts.addr);
+    let mut source = WebSource::connect(web_opts.addr.as_str(), web_opts.key.as_str()).await?;
+    info!("connected to web API, starting polling loop");
+    
+    let (tx, rc) = flume::unbounded();
     let _listener = tokio::spawn(async move {
         loop {
             info!("retrieving DAQ data...");
-            let daq_data = gweb::load_and_parse_daq_data(web_opts.addr.as_str(), web_opts.key.as_str())
-                .await;
+            let daq_data = source.poll().await;
             match daq_data {
                 Err(err) => error!("error while retrieving DAQ data: {}", err),
                 Ok(daq_data) => {
@@ -64,8 +68,8 @@ pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Option
                 },
             };
 
-            debug!("waiting {:?} seconds...", opts.interval);
-            tokio::time::sleep(opts.interval).await;
+            debug!("waiting {:?} seconds...", interval);
+            tokio::time::sleep(interval).await;
         }
     });
 

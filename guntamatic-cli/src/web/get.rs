@@ -1,18 +1,19 @@
 use clap::Parser;
-use anyhow::anyhow;
 
 #[derive(Parser)]
 #[derive(Clone)]
-pub struct Options {
+pub struct Options {}
 
-}
+pub async fn exec(
+    _global_opts: &super::super::Options,
+    web_opts: &super::Options,
+    _opts: &Options,
+) -> Result<(), anyhow::Error> {
+    use guntamatic_core::DaqSource;
+    use guntamatic_web::WebSource;
 
-pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Options, _opts: &Options) -> Result<(), anyhow::Error> {
-    use guntamatic_web as gweb;
-    
-    let daq_data = gweb::load_and_parse_daq_data(web_opts.addr.as_str(), web_opts.key.as_str())
-        .await
-        .map_err(|err| anyhow!("{}", err))?;
+    let mut source = WebSource::connect(web_opts.addr.as_str(), web_opts.key.as_str()).await?;
+    let daq_data = source.poll().await?;
     println!("{:#?}", daq_data);
 
     Ok(())

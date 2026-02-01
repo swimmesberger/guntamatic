@@ -912,6 +912,8 @@ dependencies = [
 name = "guntamatic-core"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "async-trait",
  "serde",
  "serde_json",
 ]
@@ -921,6 +923,7 @@ name = "guntamatic-modbus"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "guntamatic-core",
  "log",
  "reqwest 0.12.4",
@@ -937,6 +940,7 @@ name = "guntamatic-web"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "guntamatic-core",
  "http 1.1.0",
  "http-types",

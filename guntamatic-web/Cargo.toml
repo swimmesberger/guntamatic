@@ -13,6 +13,9 @@ path = "src/lib/mod.rs"
 [dependencies]
 guntamatic-core = { path = "../guntamatic-core" }
 
+# Async trait support
+async-trait = "0.1"
+
 reqwest = { version = "0.12.4", default-features = false, features = ["json", "rustls-tls"] }
 http = "1.1.0"
 http-types = "2.12.0"

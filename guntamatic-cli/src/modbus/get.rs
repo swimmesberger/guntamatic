@@ -1,5 +1,4 @@
 use clap::Parser;
-use anyhow::anyhow;
 
 #[derive(Parser)]
 #[derive(Clone)]
@@ -10,15 +9,15 @@ pub async fn exec(
     modbus_opts: &super::Options,
     _opts: &Options,
 ) -> Result<(), anyhow::Error> {
-    use guntamatic_modbus as gmodbus;
+    use guntamatic_core::DaqSource;
+    use guntamatic_modbus::ModbusSource;
 
-    let daq_data = gmodbus::load_and_parse_daq_data(
+    let mut source = ModbusSource::connect(
         modbus_opts.addr.as_str(),
         modbus_opts.key.as_str(),
-    )
-    .await
-    .map_err(|err| anyhow!("{}", err))?;
+    ).await?;
 
+    let daq_data = source.poll().await?;
     println!("{:#?}", daq_data);
 
     Ok(())

@@ -11,6 +11,9 @@ path = "src/lib.rs"
 [dependencies]
 guntamatic-core = { path = "../guntamatic-core" }
 
+# Async trait support
+async-trait = "0.1"
+
 # Modbus TCP client
 tokio-modbus = "0.16"
 
