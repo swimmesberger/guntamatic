@@ -11,12 +11,13 @@
 //! # Example
 //!
 //! ```no_run
-//! use guntamatic_modbus::ModbusClient;
+//! use guntamatic_modbus::ModbusSource;
+//! use guntamatic_core::DaqSource;
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let client = ModbusClient::new("192.168.1.100:502", "your-key-here");
-//!     let daq_data = client.load_and_parse_daq_data().await?;
+//!     let mut source = ModbusSource::connect("192.168.1.100:502", "your-key-here").await?;
+//!     let daq_data = source.poll().await?;
 //!     println!("{:?}", daq_data);
 //!     Ok(())
 //! }
