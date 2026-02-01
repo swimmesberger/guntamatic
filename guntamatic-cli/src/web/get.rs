@@ -1,7 +1,6 @@
 use clap::Parser;
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub struct Options {}
 
 pub async fn exec(

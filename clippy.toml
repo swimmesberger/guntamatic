@@ -1,0 +1,23 @@
+# Clippy configuration
+# Thresholds for various lints
+
+# Maximum cyclomatic complexity before warning
+cognitive-complexity-threshold = 30
+
+# Maximum number of single char bindings in scope before warning
+single-char-binding-names-threshold = 4
+
+# Minimum size for implementing Copy
+trivial-copy-size-limit = 128
+
+# Maximum size for passing by value
+pass-by-value-size-limit = 256
+
+# Maximum size for implementing Copy
+too-large-for-stack = 512
+
+# Minimum size for vectors to avoid stack allocation warnings
+vec-box-size-threshold = 8192
+
+# Allow common abbreviations
+allowed-dotfiles = ["rustfmt.toml", "clippy.toml"]

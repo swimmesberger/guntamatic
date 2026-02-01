@@ -1,0 +1,22 @@
+# Rust formatting configuration for guntamatic project
+# See: https://rust-lang.github.io/rustfmt/
+# Note: Only stable features are used for compatibility
+
+edition = "2024"
+
+# Line length
+max_width = 100
+
+# Formatting preferences
+use_small_heuristics = "Max"
+
+# Match blocks
+match_block_trailing_comma = true
+
+# Chains
+chain_width = 60
+
+# Reorder
+reorder_imports = true
+reorder_modules = true
+

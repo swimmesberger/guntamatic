@@ -2,7 +2,12 @@
 name = "guntamatic-web"
 version = "0.1.0"
 authors = ["geropl <gero.posmyk@posteo.de>"]
-edition = "2021"
+edition = "2024"
+description = "HTTP/Web client for Guntamatic heating devices"
+repository = "https://github.com/swimmes/guntamatic"
+license = "MIT OR Apache-2.0"
+keywords = ["guntamatic", "http", "web", "iot", "monitoring"]
+categories = ["hardware-support", "web-programming"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,18 +18,15 @@ path = "src/lib/mod.rs"
 [dependencies]
 guntamatic-core = { path = "../guntamatic-core" }
 
-# Async trait support
-async-trait = "0.1"
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+http = { workspace = true }
+http-types = { workspace = true }
 
-reqwest = { version = "0.12.4", default-features = false, features = ["json", "rustls-tls"] }
-http = "1.1.0"
-http-types = "2.12.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_qs = { workspace = true }
+serde_repr = { workspace = true }
 
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde_qs = "0.13.0"
-serde_repr = "0.1.10"
-
-log = "0.4"
-thiserror = "1.0"
-anyhow = "1.0"
+log = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }

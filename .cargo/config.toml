@@ -1,4 +1,53 @@
+# Cargo configuration for guntamatic project
+
 [build]
+# Use all CPU cores for parallel compilation
+jobs = -1
+# Uncomment target for cross-compilation:
 #target = "x86_64-pc-windows-msvc"
 #target = "x86_64-unknown-linux-musl"
-# Uncomment above for cross-compilation to Linux
+
+[target.x86_64-unknown-linux-musl]
+# Linker for musl builds (used in Docker)
+linker = "x86_64-linux-musl-gcc"
+
+[alias]
+# Convenient aliases for common tasks
+check-all = "check --all-targets --all-features"
+test-all = "test --all-features --workspace"
+lint = "clippy --all-targets --all-features -- -D warnings"
+fmt-check = "fmt --all -- --check"
+
+# Clippy lint configuration
+[lints.clippy]
+# Deny common mistakes and anti-patterns
+all = { level = "deny", priority = -1 }
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+complexity = "warn"
+perf = "warn"
+style = "warn"
+
+# Pedantic lints (selectively enabled)
+must_use_candidate = "warn"
+missing_errors_doc = "warn"
+missing_panics_doc = "warn"
+doc_markdown = "warn"
+
+# Nursery lints (future-facing)
+future_not_send = "warn"
+
+# Cargo lints
+cargo_common_metadata = "warn"
+
+# Allowed lints (reduce noise)
+module_name_repetitions = "allow"
+similar_names = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"
+type_complexity = "allow"
+
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "warn"
+unused_qualifications = "warn"

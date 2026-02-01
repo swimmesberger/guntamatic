@@ -1,13 +1,13 @@
 
-<a href="https://gitpod.io/#https://github.com/geropl/guntamatic"><img align="right" src="https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod"></a>
+<a href="https://gitpod.io/#https://github.com/swimmes/guntamatic"><img align="right" src="https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod"></a>
 
 # What this is
 
 This is a tiny Rust library and cli to connect to [Guntamatic](https://www.guntamatic.com/) devices via HTTP (modbus is planed but not started yet).
 
 ```sh
-guntamatic 0.1.0
-Gero Posmyk-Leinemann <gero.posmyk@posteo.de>
+guntamatic 0.3.0
+simon wimmesberger <wimmesberger@gmail.com>
 CLI tool to connect to and extract data from Guntamatic Devices
 
 USAGE:
@@ -53,4 +53,4 @@ Should give you a standalone executable for linux.
 
 # How to Contribute
 
-Easiest is to use https://www.gitpod.io: [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/geropl/guntamatic)
+Easiest is to use https://www.gitpod.io: [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/swimmes/guntamatic)

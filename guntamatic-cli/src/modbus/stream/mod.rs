@@ -2,8 +2,7 @@ use std::time::Duration;
 
 use clap::Parser;
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub struct Options {
     /// The interval in which to poll the device for data [seconds]
     #[arg(
@@ -20,14 +19,10 @@ pub struct Options {
     pub sink: Sink,
 }
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub enum Sink {
     #[cfg(feature = "sink_influxdb")]
-    #[command(
-        name = "influxdb",
-        about = "Push parsed DAQ data into the configured InfluxDB"
-    )]
+    #[command(name = "influxdb", about = "Push parsed DAQ data into the configured InfluxDB")]
     InfluxDB(crate::sink::influxdb::Options),
 }
 
@@ -44,10 +39,8 @@ pub async fn exec(
 
     // Connect once at startup
     info!("connecting to Modbus at {}...", modbus_opts.addr);
-    let mut source = ModbusSource::connect(
-        modbus_opts.addr.as_str(),
-        modbus_opts.key.as_str(),
-    ).await?;
+    let mut source =
+        ModbusSource::connect(modbus_opts.addr.as_str(), modbus_opts.key.as_str()).await?;
     info!("connected to Modbus, starting polling loop");
 
     let (tx, rc) = flume::unbounded();
@@ -55,7 +48,7 @@ pub async fn exec(
         loop {
             info!("retrieving DAQ data via Modbus...");
             let daq_data = source.poll().await;
-            
+
             match daq_data {
                 Err(err) => {
                     error!("error while retrieving DAQ data: {}", err);
@@ -66,17 +59,14 @@ pub async fn exec(
                     } else {
                         info!("reconnected successfully");
                     }
-                }
+                },
                 Ok(daq_data) => {
-                    debug!(
-                        "sending {:?} number of entries...",
-                        daq_data.values.len()
-                    );
+                    debug!("sending {:?} number of entries...", daq_data.values.len());
                     let res = tx.send_async(daq_data).await;
                     if let Err(err) = res {
                         error!("error while forwarding DAQ data: {}", err);
                     }
-                }
+                },
             };
 
             debug!("waiting {:?} seconds...", interval);
@@ -88,7 +78,7 @@ pub async fn exec(
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
             crate::sink::influxdb::drain(influx_opts, rc, "modbus").await?;
-        }
+        },
     };
     Ok(())
 }

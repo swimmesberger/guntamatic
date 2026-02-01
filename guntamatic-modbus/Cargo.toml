@@ -2,7 +2,12 @@
 name = "guntamatic-modbus"
 version = "0.1.0"
 authors = ["swimmes <wimmesberger@gmail.com>"]
-edition = "2021"
+edition = "2024"
+description = "Modbus/TCP client for Guntamatic heating devices"
+repository = "https://github.com/swimmes/guntamatic"
+license = "MIT OR Apache-2.0"
+keywords = ["guntamatic", "modbus", "iot", "monitoring"]
+categories = ["hardware-support", "network-programming"]
 
 [lib]
 name = "guntamatic_modbus"
@@ -11,28 +16,25 @@ path = "src/lib.rs"
 [dependencies]
 guntamatic-core = { path = "../guntamatic-core" }
 
-# Async trait support
-async-trait = "0.1"
-
 # Modbus TCP client
-tokio-modbus = "0.16"
+tokio-modbus = { workspace = true }
 
 # Async runtime
-tokio = { version = "1.37", features = ["net", "time"] }
+tokio = { workspace = true, features = ["net", "time"] }
 
 # HTTP client for mapping fetch
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+reqwest = { workspace = true, features = ["rustls-tls"] }
 
 # HTML parsing for mbmap.cgi
-scraper = "0.22"
+scraper = { workspace = true }
 
 # Serialization
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 # Error handling
-thiserror = "1.0"
-anyhow = "1.0"
+thiserror = { workspace = true }
+anyhow = { workspace = true }
 
 # Logging
-log = "0.4"
+log = { workspace = true }

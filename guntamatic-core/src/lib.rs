@@ -1,8 +1,7 @@
 //! Core types shared between guntamatic-web and guntamatic-modbus.
 
-use std::fmt::Display;
-use async_trait::async_trait;
 use serde::Deserialize;
+use std::fmt::Display;
 
 /// A trait for DAQ data sources that can be polled for data.
 ///
@@ -24,7 +23,7 @@ use serde::Deserialize;
 ///     }
 /// }
 /// ```
-#[async_trait]
+#[allow(async_fn_in_trait)] // Send bound is enforced via trait bound
 pub trait DaqSource: Send {
     /// Poll for current DAQ data.
     ///
@@ -50,8 +49,7 @@ pub struct DaqValue {
 }
 
 /// Metadata describing a DAQ channel.
-#[derive(Debug, Clone, PartialEq)]
-#[derive(Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct DaqDescription {
     pub id: u32,
     pub name: String,
@@ -86,8 +84,8 @@ impl<'de> Deserialize<'de> for DataType {
                 return Err(Error::unknown_variant(
                     v,
                     &["float", "int", "integer", "bool", "boolean", "string"],
-                ))
-            }
+                ));
+            },
         })
     }
 }
@@ -143,9 +141,7 @@ impl<'de> Deserialize<'de> for Unit {
             "h" => Self::Hours,
             "m3" => Self::CubicMeter,
             "" | " " => Self::None,
-            v => {
-                return Err(Error::unknown_variant(v, &["°C", "%", "d", "h", "m3", ""]))
-            }
+            v => return Err(Error::unknown_variant(v, &["°C", "%", "d", "h", "m3", ""])),
         })
     }
 }

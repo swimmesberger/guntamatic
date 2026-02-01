@@ -1,16 +1,15 @@
 use std::convert::TryInto;
+use std::sync::LazyLock;
 
 use anyhow::anyhow;
 use clap::Parser;
-use influxdb2::models::DataPoint;
 use influxdb2::Client;
-use lazy_static::lazy_static;
+use influxdb2::models::DataPoint;
 use tokio_stream::{self as stream};
 
 use guntamatic_core::{DaqData, DataType};
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub struct Options {
     #[arg(env = "INFLUXDB_URL")]
     pub url: String,
@@ -25,9 +24,7 @@ pub struct Options {
     pub org: String,
 }
 
-lazy_static! {
-    static ref WHITESPACE: regex::Regex = regex::Regex::new(r"\s+").unwrap();
-}
+static WHITESPACE: LazyLock<regex::Regex> = LazyLock::new(|| regex::Regex::new(r"\s+").unwrap());
 
 pub async fn drain(
     opts: &Options,

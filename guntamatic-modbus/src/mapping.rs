@@ -76,7 +76,11 @@ pub async fn fetch_mapping(addr: &str, key: &str) -> Result<ModbusMapping, Mappi
     debug!("Fetching mapping from {}", url);
 
     let response = reqwest::get(&url).await?;
-    let html_content = response.text().await?;
+    let bytes = response.bytes().await?;
+
+    // Decode as ISO-8859-1 (Latin-1) as specified in the Guntamatic documentation
+    // ISO-8859-1 bytes map directly to Unicode code points U+0000 to U+00FF
+    let html_content: String = bytes.iter().map(|&b| b as char).collect();
 
     trace!("Received {} bytes of HTML", html_content.len());
     parse_mapping_html(&html_content)
@@ -86,8 +90,7 @@ pub async fn fetch_mapping(addr: &str, key: &str) -> Result<ModbusMapping, Mappi
 fn parse_mapping_html(html: &str) -> Result<ModbusMapping, MappingError> {
     let document = Html::parse_document(html);
 
-    let td_selector =
-        Selector::parse("td").map_err(|e| MappingError::Parse(format!("{:?}", e)))?;
+    let td_selector = Selector::parse("td").map_err(|e| MappingError::Parse(format!("{:?}", e)))?;
 
     // Find all tables
     let table_selector =
@@ -96,7 +99,7 @@ fn parse_mapping_html(html: &str) -> Result<ModbusMapping, MappingError> {
         Selector::parse("tbody tr").map_err(|e| MappingError::Parse(format!("{:?}", e)))?;
 
     let tables: Vec<_> = document.select(&table_selector).collect();
-    
+
     if tables.is_empty() {
         return Err(MappingError::Parse("No tables found in HTML".to_string()));
     }
@@ -161,7 +164,7 @@ fn parse_mapping_html(html: &str) -> Result<ModbusMapping, MappingError> {
         let extended_table = tables[1];
         for row in extended_table.select(&tbody_tr_selector) {
             let cells: Vec<_> = row.select(&td_selector).collect();
-            
+
             // Extended text table has: Id, Register, Adresse, Größe, Name, aktueller Wert
             if cells.len() < 5 {
                 continue;
@@ -180,7 +183,10 @@ fn parse_mapping_html(html: &str) -> Result<ModbusMapping, MappingError> {
             // Find the matching entry by ID and add the extended text address
             if let Some(entry) = entries.iter_mut().find(|e| e.id == id) {
                 entry.extended_text_address = Some(extended_address);
-                trace!("Entry {} ({}) has extended text at 0x{:04X}", id, entry.name, extended_address);
+                trace!(
+                    "Entry {} ({}) has extended text at 0x{:04X}",
+                    id, entry.name, extended_address
+                );
             }
         }
         debug!("Linked extended text addresses from second table");

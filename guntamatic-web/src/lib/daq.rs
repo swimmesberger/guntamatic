@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use log::{debug, trace};
 use serde::Deserialize;
 
@@ -63,11 +62,8 @@ impl WebSource {
         // Fetch descriptions once
         let desc_url = format!("http://{}/ext/daqdesc.cgi?key={}", addr, key);
         debug!("Fetching DAQ descriptions from {}", desc_url);
-        let data_description: DaqDescriptionList = client.get(&desc_url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let data_description: DaqDescriptionList =
+            client.get(&desc_url).send().await?.json().await?;
         debug!("Cached {} DAQ descriptions", data_description.list.len());
 
         Ok(Self {
@@ -84,36 +80,27 @@ impl WebSource {
     pub async fn refresh_descriptions(&mut self) -> Result<(), anyhow::Error> {
         let desc_url = format!("http://{}/ext/daqdesc.cgi?key={}", self.addr, self.key);
         debug!("Refreshing DAQ descriptions from {}", desc_url);
-        let data_description: DaqDescriptionList = self.client.get(&desc_url)
-            .send()
-            .await?
-            .json()
-            .await?;
+        let data_description: DaqDescriptionList =
+            self.client.get(&desc_url).send().await?.json().await?;
         self.descriptions = data_description.list;
         debug!("Refreshed {} DAQ descriptions", self.descriptions.len());
         Ok(())
     }
 }
 
-#[async_trait]
 impl DaqSource for WebSource {
     async fn poll(&mut self) -> Result<DaqData, anyhow::Error> {
         let data_url = format!("http://{}/ext/daqdata.cgi?key={}", self.addr, self.key);
         trace!("Polling data from {}", data_url);
-        
-        let raw_data: RawData = self.client.get(&data_url)
-            .send()
-            .await?
-            .json()
-            .await?;
 
-        let values = self.descriptions.iter()
+        let raw_data: RawData = self.client.get(&data_url).send().await?.json().await?;
+
+        let values = self
+            .descriptions
+            .iter()
             .cloned()
             .zip(raw_data.data.into_iter())
-            .map(|(desc, value)| DaqValue {
-                description: desc,
-                value,
-            })
+            .map(|(desc, value)| DaqValue { description: desc, value })
             .collect();
 
         debug!("Polled {} DAQ values via HTTP", self.descriptions.len());
@@ -124,7 +111,6 @@ impl DaqSource for WebSource {
         "web"
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -139,22 +125,25 @@ mod test {
             {"id":10,"name":"Puffer T5","type":"float","unit":"°C"}
         ]"#;
         let desc: DaqDescriptionList = serde_json::de::from_str(s)?;
-        assert_eq!(desc, DaqDescriptionList {
-            list: vec![
-                DaqDescription {
-                    id: 3,
-                    name: "Kesseltemperatur".to_string(),
-                    typ: DataType::Float,
-                    unit: Some(Unit::DegreeCelsius),
-                },
-                DaqDescription {
-                    id: 10,
-                    name: "Puffer T5".to_string(),
-                    typ: DataType::Float,
-                    unit: Some(Unit::DegreeCelsius),
-                },
-            ],
-        });
+        assert_eq!(
+            desc,
+            DaqDescriptionList {
+                list: vec![
+                    DaqDescription {
+                        id: 3,
+                        name: "Kesseltemperatur".to_string(),
+                        typ: DataType::Float,
+                        unit: Some(Unit::DegreeCelsius),
+                    },
+                    DaqDescription {
+                        id: 10,
+                        name: "Puffer T5".to_string(),
+                        typ: DataType::Float,
+                        unit: Some(Unit::DegreeCelsius),
+                    },
+                ],
+            }
+        );
         Ok(())
     }
 
@@ -162,19 +151,22 @@ mod test {
     pub fn test_parse_raw_data() -> Result {
         use serde_json::Value::*;
         use std::str::FromStr;
-        
+
         let s = r#"[
             1, 10.23, "hello world!", false
         ]"#;
         let raw_data: RawData = serde_json::de::from_str(s)?;
-        assert_eq!(raw_data, RawData {
-            data: vec![
-                Number(serde_json::Number::from_str("1").unwrap()),
-                Number(serde_json::Number::from_f64(10.23).unwrap()),
-                String("hello world!".to_string()),
-                Bool(false),
-            ],
-        });
+        assert_eq!(
+            raw_data,
+            RawData {
+                data: vec![
+                    Number(serde_json::Number::from_str("1").unwrap()),
+                    Number(serde_json::Number::from_f64(10.23).unwrap()),
+                    String("hello world!".to_string()),
+                    Bool(false),
+                ],
+            }
+        );
         Ok(())
     }
 }

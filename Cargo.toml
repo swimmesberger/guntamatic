@@ -7,7 +7,49 @@ members = [
 ]
 resolver = "2"
 
+[workspace.dependencies]
+# Shared dependencies with unified versions
+anyhow = "1.0"
+thiserror = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+log = "0.4"
+tokio = { version = "1.49", default-features = false }
+reqwest = { version = "0.12", default-features = false }
+
+# CLI-specific
+clap = { version = "4.5", features = ["env", "derive"] }
+tokio-stream = "0.1"
+ctrlc = "3.4"
+flume = "0.11"
+hex = "0.4"
+pretty_assertions = "1.4"
+regex = "1.10"
+env_logger = "0.11"
+influxdb2 = { version = "0.5", features = ["rustls"], default-features = false }
+
+# Modbus-specific
+tokio-modbus = "0.16"
+scraper = "0.22"
+
+# Web-specific
+http = "1.1"
+http-types = "2.12"
+serde_qs = "0.13"
+serde_repr = "0.1"
+
 [profile.release]
-opt-level = 'z'  # Optimize for size.
-lto = true
-codegen-units = 1
+opt-level = 'z'  # Optimize for size
+lto = true  # Enable Link-Time Optimization
+codegen-units = 1  # Better optimization at the cost of compile time
+strip = true  # Strip symbols for smaller binary (Rust 1.59+)
+panic = 'abort'  # Reduce binary size by removing unwinding code
+
+[profile.dev]
+# Faster incremental builds during development
+incremental = true
+split-debuginfo = "unpacked"  # Faster linking on macOS/Linux
+
+[profile.test]
+# Optimization for tests without sacrificing too much compile time
+opt-level = 1

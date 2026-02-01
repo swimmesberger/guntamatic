@@ -1,12 +1,11 @@
-pub mod stream;
 pub mod get;
+pub mod stream;
 
 use std::net::IpAddr;
 
 use clap::Parser;
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub struct Options {
     /// The IP address of the local network device to bind to. ex.: 127.0.0.1
     #[arg(
@@ -30,18 +29,11 @@ pub struct Options {
     pub cmd: SubCmds,
 }
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub enum SubCmds {
-    #[command(
-        name = "stream",
-        about = "Stream DAQ data via Modbus to one of various sinks"
-    )]
+    #[command(name = "stream", about = "Stream DAQ data via Modbus to one of various sinks")]
     Stream(stream::Options),
-    #[command(
-        name = "get",
-        about = "Get DAQ data via Modbus and print it to stdout"
-    )]
+    #[command(name = "get", about = "Get DAQ data via Modbus and print it to stdout")]
     Get(get::Options),
 }
 

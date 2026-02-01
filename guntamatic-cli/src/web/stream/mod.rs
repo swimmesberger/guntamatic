@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use clap::Parser;
 
-#[cfg(feature = "sink_prometheus")]
-mod sink_prometheus;
+// Prometheus sink is not yet implemented
+// #[cfg(feature = "sink_prometheus")]
+// mod sink_prometheus;
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub struct Options {
     /// The interval in which to poll the device for data [seconds]
     #[arg(
@@ -23,8 +23,7 @@ pub struct Options {
     pub sink: Sink,
 }
 
-#[derive(Parser)]
-#[derive(Clone)]
+#[derive(Parser, Clone)]
 pub enum Sink {
     // #[cfg(feature = "sink_prometheus")]
     // #[clap(
@@ -33,25 +32,26 @@ pub enum Sink {
     // )]
     // Prometheus(sink_prometheus::Options),
     #[cfg(feature = "sink_influxdb")]
-    #[command(
-        name = "influxdb",
-        about = "Push parsed DAQ data into the configured InfluxDB"
-    )]
+    #[command(name = "influxdb", about = "Push parsed DAQ data into the configured InfluxDB")]
     InfluxDB(crate::sink::influxdb::Options),
 }
 
-pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Options, opts: &Options) -> Result<(), anyhow::Error> {
+pub async fn exec(
+    _global_opts: &super::super::Options,
+    web_opts: &super::Options,
+    opts: &Options,
+) -> Result<(), anyhow::Error> {
     use guntamatic_core::DaqSource;
     use guntamatic_web::WebSource;
 
     let sink = opts.sink.clone();
     let interval = opts.interval;
-    
+
     // Connect once at startup
     info!("connecting to web API at {}...", web_opts.addr);
     let mut source = WebSource::connect(web_opts.addr.as_str(), web_opts.key.as_str()).await?;
     info!("connected to web API, starting polling loop");
-    
+
     let (tx, rc) = flume::unbounded();
     let _listener = tokio::spawn(async move {
         loop {
@@ -74,10 +74,11 @@ pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Option
     });
 
     match &sink {
-        #[cfg(feature = "sink_prometheus")]
-        Sink::Prometheus(prom_opts) => {
-            sink_prometheus::serve_metrics(prom_opts, results_rc).await?;
-        },
+        // Future prometheus sink implementation
+        // #[cfg(feature = "sink_prometheus")]
+        // Sink::Prometheus(prom_opts) => {
+        //     sink_prometheus::serve_metrics(prom_opts, rc).await?;
+        // },
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
             crate::sink::influxdb::drain(&influx_opts, rc, "web").await?;

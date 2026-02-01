@@ -46,7 +46,7 @@ mod decode;
 mod mapping;
 
 pub use client::ModbusSource;
-pub use mapping::{fetch_mapping, ModbusMapping, ModbusMappingEntry};
+pub use mapping::{ModbusMapping, ModbusMappingEntry, fetch_mapping};
 
 // Re-export core types for convenience
 pub use guntamatic_core::{DaqData, DaqDescription, DaqSource, DaqValue, DataType, Unit};

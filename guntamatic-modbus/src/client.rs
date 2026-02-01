@@ -2,7 +2,6 @@
 
 use std::net::SocketAddr;
 
-use async_trait::async_trait;
 use log::{debug, trace};
 use tokio_modbus::client::tcp;
 use tokio_modbus::prelude::*;
@@ -10,7 +9,7 @@ use tokio_modbus::prelude::*;
 use guntamatic_core::{DaqData, DaqSource, DaqValue};
 
 use crate::decode::decode_value;
-use crate::mapping::{fetch_mapping, ModbusMapping};
+use crate::mapping::{ModbusMapping, fetch_mapping};
 
 /// Parse the address string into socket address and HTTP address.
 fn parse_address(addr: &str) -> (SocketAddr, String) {
@@ -21,9 +20,7 @@ fn parse_address(addr: &str) -> (SocketAddr, String) {
         }
     }
 
-    let socket_addr: SocketAddr = format!("{}:502", addr)
-        .parse()
-        .expect("Invalid IP address");
+    let socket_addr: SocketAddr = format!("{}:502", addr).parse().expect("Invalid IP address");
     let http_addr = addr.to_string();
 
     (socket_addr, http_addr)
@@ -90,15 +87,11 @@ impl ModbusSource {
 
         debug!("Authenticating...");
         let key_registers = encode_key(key);
-        ctx.write_multiple_registers(0x0100, &key_registers).await??;
+        ctx.write_multiple_registers(0x0100, &key_registers)
+            .await??;
         debug!("Authentication complete");
 
-        Ok(Self {
-            ctx,
-            mapping,
-            key: key.to_string(),
-            addr: socket_addr,
-        })
+        Ok(Self { ctx, mapping, key: key.to_string(), addr: socket_addr })
     }
 
     /// Reconnect to the device (e.g., after a connection failure).
@@ -111,7 +104,9 @@ impl ModbusSource {
 
         debug!("Re-authenticating...");
         let key_registers = encode_key(&self.key);
-        self.ctx.write_multiple_registers(0x0100, &key_registers).await??;
+        self.ctx
+            .write_multiple_registers(0x0100, &key_registers)
+            .await??;
         debug!("Re-authentication complete");
 
         Ok(())
@@ -126,8 +121,20 @@ impl ModbusSource {
             return Ok(values);
         }
 
-        let min_addr = self.mapping.entries.iter().map(|e| e.address).min().unwrap_or(0x4000);
-        let max_addr = self.mapping.entries.iter().map(|e| e.address).max().unwrap_or(0x4000);
+        let min_addr = self
+            .mapping
+            .entries
+            .iter()
+            .map(|e| e.address)
+            .min()
+            .unwrap_or(0x4000);
+        let max_addr = self
+            .mapping
+            .entries
+            .iter()
+            .map(|e| e.address)
+            .max()
+            .unwrap_or(0x4000);
 
         let mut all_registers: Vec<u16> = Vec::new();
         let total_registers = (max_addr - min_addr + 2) as u16;
@@ -146,20 +153,24 @@ impl ModbusSource {
         }
 
         // Collect entries with extended text addresses first to avoid borrow conflicts
-        let entries_with_ext: Vec<_> = self.mapping.entries.iter()
+        let entries_with_ext: Vec<_> = self
+            .mapping
+            .entries
+            .iter()
             .filter_map(|e| e.extended_text_address.map(|addr| (e.id, addr)))
             .collect();
 
         // Read all extended texts
-        let mut ext_texts: std::collections::HashMap<u32, String> = std::collections::HashMap::new();
+        let mut ext_texts: std::collections::HashMap<u32, String> =
+            std::collections::HashMap::new();
         for (id, ext_addr) in entries_with_ext {
             match read_extended_text(&mut self.ctx, ext_addr).await {
                 Ok(ext_text) => {
                     ext_texts.insert(id, ext_text);
-                }
+                },
                 Err(e) => {
                     log::warn!("Failed to read extended text for id {}: {}", id, e);
-                }
+                },
             }
         }
 
@@ -169,7 +180,9 @@ impl ModbusSource {
             if reg_offset + 1 >= all_registers.len() {
                 log::warn!(
                     "Register offset {} out of bounds for entry {} ({})",
-                    reg_offset, entry.id, entry.name
+                    reg_offset,
+                    entry.id,
+                    entry.name
                 );
                 continue;
             }
@@ -188,10 +201,7 @@ impl ModbusSource {
                 value = serde_json::Value::String(ext_text.clone());
             }
 
-            values.push(DaqValue {
-                value,
-                description: entry.to_daq_description(),
-            });
+            values.push(DaqValue { value, description: entry.to_daq_description() });
         }
 
         debug!("Read {} DAQ values", values.len());
@@ -199,11 +209,14 @@ impl ModbusSource {
     }
 }
 
-async fn read_extended_text(ctx: &mut tokio_modbus::client::Context, address: u32) -> Result<String, anyhow::Error> {
+async fn read_extended_text(
+    ctx: &mut tokio_modbus::client::Context,
+    address: u32,
+) -> Result<String, anyhow::Error> {
     const EXTENDED_TEXT_REGISTERS: u16 = 32;
 
     trace!("Reading {} registers from address 0x{:04X}", EXTENDED_TEXT_REGISTERS, address);
-    
+
     let registers = ctx
         .read_input_registers(address as u16, EXTENDED_TEXT_REGISTERS)
         .await??;
@@ -225,7 +238,6 @@ async fn read_extended_text(ctx: &mut tokio_modbus::client::Context, address: u3
     Ok(text)
 }
 
-#[async_trait]
 impl DaqSource for ModbusSource {
     async fn poll(&mut self) -> Result<DaqData, anyhow::Error> {
         debug!("Polling Modbus at {}", self.addr);

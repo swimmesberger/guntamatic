@@ -47,7 +47,6 @@ pub enum SubCmds {
     Modbus(modbus::Options),
 }
 
-
 fn parse_duration(secs_str: &str) -> Result<Duration, std::num::ParseIntError> {
     use std::str::FromStr;
     let secs = u64::from_str(secs_str)?;
@@ -68,10 +67,10 @@ async fn main() -> AResult<()> {
         2 => log::LevelFilter::Debug,
         _ => log::LevelFilter::Trace,
     };
-    pretty_env_logger::formatted_timed_builder()
+    env_logger::Builder::from_default_env()
         .filter_level(log_level)
         .init();
-    
+
     // set ctrl-c handler
     let (exit_tx, exit_rc) = flume::unbounded::<(bool, i32)>();
     let ctrl_c_tx = exit_tx.clone();
@@ -90,7 +89,6 @@ async fn main() -> AResult<()> {
         };
         let _ = exit_tx.try_send((false, rc));
     });
-
 
     let (ctrl_c, rc) = exit_rc.recv_async().await?;
     if ctrl_c {
@@ -115,20 +113,20 @@ async fn execute(options: Options) -> Result<(), anyhow::Error> {
                 web::stream::exec(&options, web_opts, stream_opts)
                     .await
                     .map_err(|err| anyhow!("error while streaming DAQ data (web): {}", err))?;
-            }
+            },
             web::SubCmds::Get(get_opts) => {
                 web::get::exec(&options, web_opts, get_opts).await?;
-            }
+            },
         },
         SubCmds::Modbus(modbus_opts) => match &modbus_opts.cmd {
             modbus::SubCmds::Stream(stream_opts) => {
                 modbus::stream::exec(&options, modbus_opts, stream_opts)
                     .await
                     .map_err(|err| anyhow!("error while streaming DAQ data (modbus): {}", err))?;
-            }
+            },
             modbus::SubCmds::Get(get_opts) => {
                 modbus::get::exec(&options, modbus_opts, get_opts).await?;
-            }
+            },
         },
     }
     Ok(())
