@@ -4,8 +4,6 @@ use clap::Parser;
 
 #[cfg(feature = "sink_prometheus")]
 mod sink_prometheus;
-#[cfg(feature = "sink_influxdb")]
-mod sink_influxdb;
 
 #[derive(Parser)]
 #[derive(Clone)]
@@ -39,7 +37,7 @@ pub enum Sink {
         name = "influxdb",
         about = "Push parsed DAQ data into the configured InfluxDB"
     )]
-    InfluxDB(sink_influxdb::Options),
+    InfluxDB(crate::sink::influxdb::Options),
 }
 
 pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Options, opts: &Options) -> Result<(), anyhow::Error> {
@@ -78,7 +76,7 @@ pub async fn exec(_global_opts: &super::super::Options, web_opts: &super::Option
         },
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
-            sink_influxdb::drain(&influx_opts, rc).await?;
+            crate::sink::influxdb::drain(&influx_opts, rc, "web").await?;
         },
     };
     Ok(())

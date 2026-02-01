@@ -2,9 +2,6 @@ use std::time::Duration;
 
 use clap::Parser;
 
-#[cfg(feature = "sink_influxdb")]
-mod sink_influxdb;
-
 #[derive(Parser)]
 #[derive(Clone)]
 pub struct Options {
@@ -31,7 +28,7 @@ pub enum Sink {
         name = "influxdb",
         about = "Push parsed DAQ data into the configured InfluxDB"
     )]
-    InfluxDB(sink_influxdb::Options),
+    InfluxDB(crate::sink::influxdb::Options),
 }
 
 pub async fn exec(
@@ -77,7 +74,7 @@ pub async fn exec(
     match &sink {
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
-            sink_influxdb::drain(influx_opts, rc).await?;
+            crate::sink::influxdb::drain(influx_opts, rc, "modbus").await?;
         }
     };
     Ok(())

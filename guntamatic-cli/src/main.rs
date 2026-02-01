@@ -8,6 +8,9 @@ use std::time::Duration;
 mod modbus;
 mod web;
 
+#[cfg(feature = "sink_influxdb")]
+mod sink;
+
 #[derive(Parser)]
 #[command(
     name = "guntamatic",
