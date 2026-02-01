@@ -1,15 +1,17 @@
 use clap::Parser;
 
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 
 use std::time::Duration;
 
+mod modbus;
 mod web;
 
 #[derive(Parser)]
 #[command(
     name = "guntamatic",
-    version = "0.2.1",
+    version = "0.3.0",
     author = "swimmes <wimmesberger@gmail.com>",
     about = "CLI tool to connect to and extract data from Guntamatic Devices",
     help_template = "\
@@ -32,13 +34,14 @@ pub struct Options {
     #[command(subcommand)]
     cmd: SubCmds,
 }
+
 #[derive(Parser)]
 pub enum SubCmds {
-    #[command(
-        name = "web",
-        about = "Accessing devices using web/HTTP APIs"
-    )]
+    #[command(name = "web", about = "Accessing devices using web/HTTP APIs")]
     Web(web::Options),
+
+    #[command(name = "modbus", about = "Accessing devices using Modbus/TCP protocol")]
+    Modbus(modbus::Options),
 }
 
 
@@ -104,17 +107,24 @@ async fn execute(options: Options) -> Result<(), anyhow::Error> {
     use anyhow::anyhow;
 
     match &options.cmd {
-        SubCmds::Web(web_opts) => {
-            match &web_opts.cmd {
-                web::SubCmds::Stream(stream_opts) => {
-                    web::stream::exec(&options, &web_opts, stream_opts)
-                        .await
-                        .map_err(|err| anyhow!("error while streaming DAQ data: {}", err))?;
-                },
-                web::SubCmds::Get(get_opts) => {
-                    web::get::exec(&options, &web_opts, get_opts)
-                        .await?;
-                }
+        SubCmds::Web(web_opts) => match &web_opts.cmd {
+            web::SubCmds::Stream(stream_opts) => {
+                web::stream::exec(&options, web_opts, stream_opts)
+                    .await
+                    .map_err(|err| anyhow!("error while streaming DAQ data (web): {}", err))?;
+            }
+            web::SubCmds::Get(get_opts) => {
+                web::get::exec(&options, web_opts, get_opts).await?;
+            }
+        },
+        SubCmds::Modbus(modbus_opts) => match &modbus_opts.cmd {
+            modbus::SubCmds::Stream(stream_opts) => {
+                modbus::stream::exec(&options, modbus_opts, stream_opts)
+                    .await
+                    .map_err(|err| anyhow!("error while streaming DAQ data (modbus): {}", err))?;
+            }
+            modbus::SubCmds::Get(get_opts) => {
+                modbus::get::exec(&options, modbus_opts, get_opts).await?;
             }
         },
     }

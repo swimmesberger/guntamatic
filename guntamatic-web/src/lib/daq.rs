@@ -1,18 +1,7 @@
-use std::fmt::Display;
 use log::trace;
 use serde::Deserialize;
 
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct DaqData {
-    pub values: Vec<DaqValue>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct DaqValue {
-    pub value: serde_json::Value,
-    pub description: DaqDescription,
-}
+use guntamatic_core::{DaqData, DaqDescription, DaqValue, DataType, Unit};
 
 #[derive(Debug, Clone, PartialEq)]
 #[derive(Deserialize)]
@@ -26,93 +15,6 @@ pub struct RawData {
 #[serde(transparent)]
 pub struct DaqDescriptionList {
     pub list: Vec<DaqDescription>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-#[derive(Deserialize)]
-pub struct DaqDescription {
-    pub id: u32,
-    pub name: String,
-    #[serde(rename = "type")]
-    pub typ: DataType,
-    pub unit: Option<Unit>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum DataType {
-    Float ,
-    Integer,
-    Boolean,
-    String,
-}
-
-impl <'de> Deserialize<'de> for DataType {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
-        use serde::de::Error;
-
-        let s = String::deserialize(deserializer)?;
-        Ok(match s.as_str() {
-            "float" => Self::Float,
-            "integer" => Self::Integer,
-            "boolean" => Self::Boolean,
-            "string" => Self::String,
-            v => return Err(Error::unknown_variant(v, &[
-                "float",
-                "integer",
-                "boolean",
-                "string",
-            ])),
-        })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Unit {
-    DegreeCelsius,
-    Percent,
-    Days,
-    Hours,
-    CubicMeter,
-    None,
-}
-
-impl Display for Unit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
-            Self::DegreeCelsius => "°C",
-            Self::Percent => "%",
-            Self::Days => "d",
-            Self::Hours => "h",
-            Self::CubicMeter => "m3",
-            _ => ""
-        }.to_string();
-        write!(f, "{}", str)
-    }
-}
-
-impl <'de> Deserialize<'de> for Unit {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
-        use serde::de::Error;
-
-        let s = String::deserialize(deserializer)?;
-        Ok(match s.as_str() {
-            "°C" => Self::DegreeCelsius,
-            "%" => Self::Percent,
-            "d" => Self::Days,
-            "h" => Self::Hours,
-            "m3" => Self::CubicMeter,
-            " " => Self::None,
-            v => return Err(Error::unknown_variant(v, &[
-                "°C",
-                "%",
-                "d",
-                "h",
-                "m3",
-            ])),
-        })
-    }
 }
 
 pub async fn load_and_parse_daq_data(addr: &str, key: &str) -> Result<DaqData, http_types::Error> {
