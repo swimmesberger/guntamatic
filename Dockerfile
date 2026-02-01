@@ -1,7 +1,11 @@
 # Build stage
 FROM rust:1.93-alpine AS builder
 
-RUN apk add --no-cache musl-dev build-base
+# Install build dependencies for musl target compilation
+RUN apk add --no-cache \
+    musl-dev \
+    build-base \
+    && which x86_64-linux-musl-gcc || (echo "musl-gcc not found" && exit 1)
 
 WORKDIR /usr/src/guntamatic
 COPY . .
