@@ -23,25 +23,6 @@
 //! }
 //! ```
 
-//! Guntamatic Modbus/TCP client library.
-//!
-//! This crate provides a client for communicating with Guntamatic heating systems
-//! via the Modbus/TCP protocol.
-//!
-//! # Example
-//!
-//! ```ignore
-//! use guntamatic_modbus::ModbusSource;
-//! use guntamatic_core::DaqSource;
-//!
-//! let mut source = ModbusSource::connect("192.168.1.100", "your-key").await?;
-//! loop {
-//!     let data = source.poll().await?;
-//!     println!("{:?}", data);
-//!     tokio::time::sleep(std::time::Duration::from_secs(30)).await;
-//! }
-//! ```
-
 mod client;
 mod decode;
 mod mapping;
