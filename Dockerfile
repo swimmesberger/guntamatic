@@ -9,6 +9,9 @@ RUN apk add --no-cache \
 WORKDIR /usr/src/guntamatic
 COPY . .
 
+# Tell Cargo to use gcc as the linker for musl target (Alpine's gcc is musl)
+ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=gcc
+
 RUN cargo build --release --all-features --target x86_64-unknown-linux-musl
 
 # Runtime stage
