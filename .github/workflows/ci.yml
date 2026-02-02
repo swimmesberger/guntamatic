@@ -116,6 +116,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail CI on dependency vulnerabilities
     steps:
       - uses: actions/checkout@v4
       

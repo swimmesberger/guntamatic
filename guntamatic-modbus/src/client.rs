@@ -13,11 +13,11 @@ use crate::mapping::{ModbusMapping, fetch_mapping};
 
 /// Parse the address string into socket address and HTTP address.
 fn parse_address(addr: &str) -> (SocketAddr, String) {
-    if addr.contains(':') {
-        if let Ok(socket_addr) = addr.parse::<SocketAddr>() {
-            let http_addr = socket_addr.ip().to_string();
-            return (socket_addr, http_addr);
-        }
+    if addr.contains(':')
+        && let Ok(socket_addr) = addr.parse::<SocketAddr>()
+    {
+        let http_addr = socket_addr.ip().to_string();
+        return (socket_addr, http_addr);
     }
 
     let socket_addr: SocketAddr = format!("{}:502", addr).parse().expect("Invalid IP address");

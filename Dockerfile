@@ -1,10 +1,27 @@
+# Build stage
+FROM rust:1.93-alpine AS builder
+
+# Install build dependencies for musl target compilation
+RUN apk add --no-cache \
+    musl-dev \
+    build-base
+
+WORKDIR /usr/src/guntamatic
+COPY . .
+
+# Tell Cargo to use gcc as the linker for musl target (Alpine's gcc is musl)
+ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=gcc
+
+RUN cargo build --release --all-features --target x86_64-unknown-linux-musl
+
+# Runtime stage
 FROM alpine:3.19
 
 RUN apk add bash curl
 
 RUN mkdir -p /app
 WORKDIR /app
-COPY target/x86_64-unknown-linux-musl/release/guntamatic /app/guntamatic
+COPY --from=builder /usr/src/guntamatic/target/x86_64-unknown-linux-musl/release/guntamatic /app/guntamatic
 
 # Default to web protocol, but allow override via CMD
 # All connection parameters can be set via environment variables:

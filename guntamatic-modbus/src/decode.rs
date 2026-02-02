@@ -106,14 +106,14 @@ mod tests {
     fn test_decode_bool_true() {
         let bytes = [0x00, 0x00, 0x00, 0x01];
         let value = decode_bool(&bytes);
-        assert_eq!(value.as_bool().unwrap(), true);
+        assert!(value.as_bool().unwrap());
     }
 
     #[test]
     fn test_decode_bool_false() {
         let bytes = [0x00, 0x00, 0x00, 0x00];
         let value = decode_bool(&bytes);
-        assert_eq!(value.as_bool().unwrap(), false);
+        assert!(!value.as_bool().unwrap());
     }
 
     #[test]
