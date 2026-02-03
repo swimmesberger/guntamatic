@@ -30,11 +30,10 @@ influxdb2 = { version = "0.5", features = ["rustls"], default-features = false }
 
 # Modbus-specific
 tokio-modbus = "0.16"
-scraper = "0.22"
+scraper = "0.25"
 
 # Web-specific
 http = "1.1"
-http-types = "2.12"
 serde_qs = "0.13"
 serde_repr = "0.1"
 

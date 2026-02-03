@@ -14,7 +14,7 @@ pub enum Response {
     Err { err: String },
 }
 
-pub type Result = std::result::Result<Response, http_types::Error>;
+pub type Result = anyhow::Result<Response>;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Synonym {
