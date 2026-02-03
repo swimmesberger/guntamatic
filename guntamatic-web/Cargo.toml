@@ -20,7 +20,6 @@ guntamatic-core = { path = "../guntamatic-core" }
 
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }
 http = { workspace = true }
-http-types = { workspace = true }
 
 serde = { workspace = true }
 serde_json = { workspace = true }
