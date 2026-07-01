@@ -15,27 +15,32 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 log = "0.4"
 tokio = { version = "1.49", default-features = false }
-reqwest = { version = "0.12", default-features = false }
+reqwest = { version = "0.13", default-features = false }
 
 # CLI-specific
-clap = { version = "4.5", features = ["env", "derive"] }
+clap = { version = "4.6", features = ["env", "derive"] }
 tokio-stream = "0.1"
-ctrlc = "3.4"
+ctrlc = "3.5"
 flume = "0.11"
 hex = "0.4"
 pretty_assertions = "1.4"
-regex = "1.10"
+regex = "1.12"
 env_logger = "0.11"
 influxdb2 = { version = "0.5", features = ["rustls"], default-features = false }
+influxdb3-client = "0.2"
+# rustls with the ring provider; installed process-wide so reqwest's
+# `rustls-no-provider` clients pick it up (avoids pulling in aws-lc-rs, which
+# needs cmake/perl to build on musl).
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 
 # Modbus-specific
-tokio-modbus = "0.16"
-scraper = "0.22"
+tokio-modbus = "0.17"
+scraper = "0.27"
 
 # Web-specific
-http = "1.1"
+http = "1.4"
 http-types = "2.12"
-serde_qs = "0.13"
+serde_qs = "1.1"
 serde_repr = "0.1"
 
 [profile.release]

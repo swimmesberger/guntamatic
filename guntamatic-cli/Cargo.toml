@@ -21,6 +21,7 @@ path = "src/main.rs"
 [features]
 default = ["sink_influxdb"]
 sink_influxdb = ["influxdb2"]
+sink_influxdb3 = ["influxdb3-client"]
 # sink_prometheus = ["prometheus", "warp"]
 
 
@@ -52,7 +53,14 @@ flume = { workspace = true }
 # sink_influxdb
 influxdb2 = { workspace = true, optional = true }
 
+# sink_influxdb3
+influxdb3-client = { workspace = true, optional = true }
+
 # misc
 hex = { workspace = true }
 pretty_assertions = { workspace = true }
 regex = { workspace = true }
+rustls = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

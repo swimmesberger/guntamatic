@@ -8,7 +8,7 @@ use std::time::Duration;
 mod modbus;
 mod web;
 
-#[cfg(feature = "sink_influxdb")]
+#[cfg(any(feature = "sink_influxdb", feature = "sink_influxdb3"))]
 mod sink;
 
 #[derive(Parser)]
@@ -58,6 +58,10 @@ type AResult<T> = Result<T, anyhow::Error>;
 //noinspection RsUnreachableCode
 #[tokio::main]
 async fn main() -> AResult<()> {
+    // Install the ring crypto provider process-wide. reqwest clients are built
+    // with `rustls-no-provider`, so they rely on this default being present.
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
     let options = Options::parse();
 
     // initialize logger

@@ -99,7 +99,7 @@ impl DaqSource for WebSource {
             .descriptions
             .iter()
             .cloned()
-            .zip(raw_data.data.into_iter())
+            .zip(raw_data.data)
             .map(|(desc, value)| DaqValue { description: desc, value })
             .collect();
 

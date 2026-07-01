@@ -26,15 +26,20 @@ SUBCOMMANDS:
 
 The cli allows to:
  - `get`: read the current system state once
- - `stream`: read the current system state regularly and pump it into a data sink (currently [influxdb v2.0](https://docs.influxdata.com/influxdb/v2.0/) only)
+ - `stream`: read the current system state regularly and pump it into a data sink. Two sinks are available:
+   - `influxdb`: [InfluxDB v2](https://docs.influxdata.com/influxdb/v2/) (also works against InfluxDB 3 via its v2 write-compatibility endpoint). Enabled by default (`sink_influxdb` feature).
+   - `influxdb3`: native [InfluxDB 3](https://docs.influxdata.com/influxdb3/) writes via the `/api/v3/write_lp` API. Opt-in via the `sink_influxdb3` feature (pulls a heavier dependency tree — Arrow/gRPC — so it is not in the default build).
 
 Example commands:
 ```sh
-# Using web/HTTP API
+# Using web/HTTP API -> InfluxDB 2
 cargo run web <device IP> <API key> stream influxdb <url> <token> <bucket> <org>
 
-# Using Modbus/TCP
+# Using Modbus/TCP -> InfluxDB 2
 cargo run modbus <device IP> stream influxdb <url> <token> <bucket> <org>
+
+# Native InfluxDB 3 sink (requires the sink_influxdb3 feature)
+cargo run --features sink_influxdb3 web <device IP> <API key> stream influxdb3 <url> <token> <database>
 ```
 
 
@@ -89,16 +94,41 @@ docker run \
   -vv modbus stream influxdb
 ```
 
+### Using the native InfluxDB 3 sink
+
+The published Docker image is built with `--all-features`, so the `influxdb3`
+sink is available out of the box:
+
+```sh
+docker run \
+  -e GUNTAMATIC_ADDRESS=192.168.1.100 \
+  -e GUNTAMATIC_TOKEN=your-api-key \
+  -e INFLUXDB3_URL=http://influxdb3:8181 \
+  -e INFLUXDB3_TOKEN=your-influxdb3-token \
+  -e INFLUXDB3_DATABASE=guntamatic \
+  ghcr.io/swimmes/guntamatic:latest \
+  -vv web stream influxdb3
+```
+
 ### Available Environment Variables
 
 - `GUNTAMATIC_ADDRESS` (required) - IP address of the Guntamatic device
 - `GUNTAMATIC_TOKEN` (required) - Authentication key
 - `GUNTAMATIC_INTERFACE` (optional) - Local network interface IP to bind to
 - `GUNTAMATIC_POLL_INTERVAL_SECONDS` (optional, default: 30) - Polling interval
+
+InfluxDB 2 sink (`stream influxdb`):
+
 - `INFLUXDB_URL` (required) - InfluxDB server URL
 - `INFLUXDB_TOKEN` (required) - InfluxDB authentication token
 - `INFLUXDB_BUCKET` (required) - InfluxDB bucket name
 - `INFLUXDB_ORGANIZATION` (required) - InfluxDB organization name
+
+Native InfluxDB 3 sink (`stream influxdb3`):
+
+- `INFLUXDB3_URL` (required) - InfluxDB 3 server URL
+- `INFLUXDB3_TOKEN` (optional) - Auth token; omit for an unauthenticated InfluxDB 3 Core instance
+- `INFLUXDB3_DATABASE` (required) - InfluxDB 3 database name (the v3 equivalent of a v2 bucket)
 
 ### Building Docker Image Locally
 

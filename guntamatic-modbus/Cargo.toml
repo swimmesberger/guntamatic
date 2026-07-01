@@ -23,7 +23,7 @@ tokio-modbus = { workspace = true }
 tokio = { workspace = true, features = ["net", "time"] }
 
 # HTTP client for mapping fetch
-reqwest = { workspace = true, features = ["rustls-tls"] }
+reqwest = { workspace = true, features = ["rustls-no-provider", "webpki-roots"] }
 
 # HTML parsing for mbmap.cgi
 scraper = { workspace = true }
