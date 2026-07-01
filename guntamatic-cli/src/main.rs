@@ -8,7 +8,7 @@ use std::time::Duration;
 mod modbus;
 mod web;
 
-#[cfg(feature = "sink_influxdb")]
+#[cfg(any(feature = "sink_influxdb", feature = "sink_influxdb3"))]
 mod sink;
 
 #[derive(Parser)]

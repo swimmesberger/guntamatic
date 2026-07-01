@@ -24,6 +24,13 @@ pub enum Sink {
     #[cfg(feature = "sink_influxdb")]
     #[command(name = "influxdb", about = "Push parsed DAQ data into the configured InfluxDB")]
     InfluxDB(crate::sink::influxdb::Options),
+
+    #[cfg(feature = "sink_influxdb3")]
+    #[command(
+        name = "influxdb3",
+        about = "Push parsed DAQ data into the configured InfluxDB 3 database"
+    )]
+    InfluxDB3(crate::sink::influxdb3::Options),
 }
 
 pub async fn exec(
@@ -78,6 +85,10 @@ pub async fn exec(
         #[cfg(feature = "sink_influxdb")]
         Sink::InfluxDB(influx_opts) => {
             crate::sink::influxdb::drain(influx_opts, rc, "modbus").await?;
+        },
+        #[cfg(feature = "sink_influxdb3")]
+        Sink::InfluxDB3(influx_opts) => {
+            crate::sink::influxdb3::drain(influx_opts, rc, "modbus").await?;
         },
     };
     Ok(())

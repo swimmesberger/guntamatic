@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Native InfluxDB 3 sink (`stream influxdb3`) using the `influxdb3-client` crate
+  and the `/api/v3/write_lp` API, behind the opt-in `sink_influxdb3` feature
+  (configured via `INFLUXDB3_URL`/`INFLUXDB3_TOKEN`/`INFLUXDB3_DATABASE`)
 - GitHub Actions CI/CD workflows for automated testing, linting, and releases
 - Comprehensive linting configuration with rustfmt and clippy
 - Code coverage reporting with cargo-llvm-cov
@@ -25,9 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated from `async-trait` crate to native async fn in traits
 - Replaced `pretty_env_logger` with `env_logger`
 - Implemented workspace dependency management for unified versions
-- Unified `reqwest` to version 0.12 across all crates (previously mixed 0.11/0.12)
+- Unified `reqwest` to version 0.13 across the workspace crates
 - Upgraded `thiserror` to version 2.0 across all crates
 - Updated `tokio` to 1.49
+- Bumped dependencies to latest, including major versions: `reqwest` 0.13,
+  `serde_qs` 1.1, `scraper` 0.27, `tokio-modbus` 0.17, `http` 1.4, `clap` 4.6,
+  `regex` 1.12, `ctrlc` 3.5
+- Bumped Docker build image to Rust 1.96 (alpine) and runtime to alpine 3.22
 
 ### Fixed
 - Dependency version conflicts between crates
