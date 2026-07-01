@@ -28,6 +28,10 @@ regex = "1.12"
 env_logger = "0.11"
 influxdb2 = { version = "0.5", features = ["rustls"], default-features = false }
 influxdb3-client = "0.2"
+# rustls with the ring provider; installed process-wide so reqwest's
+# `rustls-no-provider` clients pick it up (avoids pulling in aws-lc-rs, which
+# needs cmake/perl to build on musl).
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 
 # Modbus-specific
 tokio-modbus = "0.17"

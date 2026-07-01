@@ -28,7 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated from `async-trait` crate to native async fn in traits
 - Replaced `pretty_env_logger` with `env_logger`
 - Implemented workspace dependency management for unified versions
-- Unified `reqwest` to version 0.13 across the workspace crates
+- Unified `reqwest` to version 0.13 across the workspace crates, pinned to the
+  rustls `ring` provider (installed process-wide in `main`) so the musl Docker
+  build does not need to compile `aws-lc-rs` (which requires cmake/perl)
 - Upgraded `thiserror` to version 2.0 across all crates
 - Updated `tokio` to 1.49
 - Bumped dependencies to latest, including major versions: `reqwest` 0.13,

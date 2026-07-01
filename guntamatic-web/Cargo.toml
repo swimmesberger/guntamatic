@@ -18,7 +18,7 @@ path = "src/lib/mod.rs"
 [dependencies]
 guntamatic-core = { path = "../guntamatic-core" }
 
-reqwest = { workspace = true, features = ["json", "rustls", "webpki-roots"] }
+reqwest = { workspace = true, features = ["json", "rustls-no-provider", "webpki-roots"] }
 http = { workspace = true }
 http-types = { workspace = true }
 
